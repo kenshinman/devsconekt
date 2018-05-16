@@ -10,6 +10,9 @@ const Profile = require('../../models/Profile')
 //Load Profile Model
 const User = require('../../models/User')
 
+//load validate profile
+const validateProfileInput = require('../../validation/profile')
+
 
 //@route GET  api/profile/test
 //@desc       get profile
@@ -32,12 +35,16 @@ router.get('/', passport.authenticate('jwt', {
   }
   Profile.findOne({
       user: req.user.id
-    })
+    }).populate('user', ['name', 'avatar'])
     .then(profile => {
       if (!profile) {
         errors.noprofile = 'There is no profile for this user'
         return res.status(404).json(errors)
       }
+      res.json({
+        success: true,
+        profile
+      })
     })
     .catch(err => {
       res.status(404).json(err)
@@ -50,8 +57,18 @@ router.get('/', passport.authenticate('jwt', {
 router.post('/', passport.authenticate('jwt', {
   session: false
 }), (req, res) => {
-  let errors = {
-    success: false
+
+
+  const {
+    errors,
+    isValid
+  } = validateProfileInput(req.body)
+  errors.success = false;
+  if (!isValid) {
+    //return errors with 400 status
+    return res.status(400).json({
+      errors
+    })
   }
 
   // Get fields
