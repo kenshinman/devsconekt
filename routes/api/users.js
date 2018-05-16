@@ -17,10 +17,12 @@ const validateLoginInput = require('../../validation/login')
 //@desc       register a user
 //@access     public
 router.post('/register', (req, res) => {
-  const {
+  let {
     errors,
     isValid
   } = validateRegisterInput(req.body);
+
+  errors.success = false;
 
   //check validation
   if (!isValid) {
@@ -76,10 +78,12 @@ router.post('/register', (req, res) => {
 //@desc       login a user
 //@access     public
 router.post('/login', (req, res) => {
-  const {
+  let {
     errors,
     isValid
   } = validateLoginInput(req.body);
+
+  errors.success = false;
 
   //check validation
   if (!isValid) {
@@ -113,7 +117,7 @@ router.post('/login', (req, res) => {
           jwt.sign(
             payload,
             keys.secretOrKey, {
-              expiresIn: 3600
+              expiresIn: 604800 //one week
             },
             (err, token) => {
               if (err) {
